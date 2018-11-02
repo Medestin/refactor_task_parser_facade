@@ -4,51 +4,50 @@ import java.util.Optional;
 /**
  * This class is thread safe.
  */
-public class ParserFacade {
+public final class ParserFacade {
+    private File file;
 
-    private static ParserFacade instance;
-
-    public static ParserFacade getInstance() {
-        if (instance == null) {
-            instance = new ParserFacade();
-        }
-        return instance;
+    private static class SingleParserInstance {
+        private static final ParserFacade PARSER_FACADE_INSTANCE = new ParserFacade();
     }
 
-    private File file;
+    public static ParserFacade getInstance() {
+        return SingleParserInstance.PARSER_FACADE_INSTANCE;
+    }
 
     public synchronized void setFile(File f) {
         file = f;
     }
 
-    public synchronized Optional<File> getFile() {
-        if (file != null) {
-            return Optional.of(file);
-        } else {
-            return null;
-        }
+    public synchronized File getFile() {
+        return Optional.of(file).orElse(null);
     }
 
     public String getContent() throws IOException {
-        FileInputStream i = new FileInputStream(file);
-        String output = "";
+        FileInputStream fileStream = new FileInputStream(file);
+        StringBuilder output = new StringBuilder();
         int data;
-        while ((data = i.read()) > 0) output += (char) data;
-        return output;
+
+        while ((data = fileStream.read()) > 0) output.append((char) data);
+        return output.toString();
     }
+
     public String getContentWithoutUnicode() throws IOException {
-        FileInputStream i = new FileInputStream(file);
-        String output = "";
+        FileInputStream fileStream = new FileInputStream(file);
+        StringBuilder output = new StringBuilder();
         int data;
-        while ((data = i.read()) > 0) if (data < 0x80) {
-            output += (char) data;
+
+        while ((data = fileStream.read()) > 0) if (data < 0x80) {
+            output.append((char) data);
         }
-        return output;
+        return output.toString();
     }
+
     public void saveContent(String content) throws IOException {
-        FileOutputStream o = new FileOutputStream(file);
+        FileOutputStream fileStream = new FileOutputStream(file);
+
         for (int i = 0; i < content.length(); i += 1) {
-            o.write(content.charAt(i));
+            fileStream.write(content.charAt(i));
         }
     }
 }
