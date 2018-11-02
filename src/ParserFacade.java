@@ -7,6 +7,10 @@ import java.util.Optional;
 public final class ParserFacade {
     private File file;
 
+    private ParserFacade(){
+
+    }
+
     private static class SingleParserInstance {
         private static final ParserFacade PARSER_FACADE_INSTANCE = new ParserFacade();
     }
